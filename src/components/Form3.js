@@ -1,99 +1,118 @@
-// import React from 'react';
-
-// import { data } from 'msw/lib/types/context';
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Form, Card } from 'react-bootstrap';
+import '../App.css';
 
-function Form3() {
-  const history = useHistory();
+const Form3 = ({ prevStep, handleFormData, values }) => {
+  const [error, setError] = useState(false);
 
-  const redirectBackward = () => {
-    history.push('./form2');
-  };
+  const [options, setOptions] = useState(['+91', '+1']);
 
-  const [options, setOptions] = useState(['+1', '+91']);
-
-  const [phn, setPhn] = useState('');
   const [checked, setChecked] = useState(true);
 
-  const [phnErr, setPhnErr] = useState({});
-
-  const apiCall = async () => {
-    try {
-      const res = await (await fetch('https://codebuddy.review/submit'),
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }).json();
-    } catch (err) {
-      console.log('Error:', err);
-    }
+  const handleChange = event => {
+    setChecked(event.target.value);
+    setOptions(event.target.value);
   };
 
-  const onSubmit = e => {
+  const submitFormData = e => {
     e.preventDefault();
-    const isValid = formValidation();
-    if (isValid) {
-      const data = new FormData(event.target);
-      setPhn('');
-      history.push('/submit');
-      apiCall();
+
+    if (values.phoneNumber.match(/^[0-9]{10}$/)) {
+      setError(false);
+      console.log(values);
+
+      fetch('https://codebuddy.review/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.parse(values),
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch(err => {
+          console.log('Error:', err);
+        });
+
+      // performAPICall();
+      // .then(res => console.log("Success:", res.json()));
+    } else {
+      setError(true);
+      // console.log(values.firstName);
+      // console.log(values.lastName);
+      // console.log(values.address);
     }
-  };
-
-  const formValidation = () => {
-    const phnErr = {};
-
-    let isValid = true;
-
-    if (!phn.match(/^[0-9]{10}/)) {
-      phnErr.phnValid = 'Enter a valid number';
-      isValid = false;
-    }
-
-    setPhnErr(phnErr);
-    return isValid;
   };
 
   return (
-    <form className="form" onSubmit={onSubmit}>
-      <select>
-        {options.map((ele, index) => (
-          <option key={index}>{ele}</option>
-        ))}
-      </select>
-      <br />
+    <div className="container">
+      <h3>Contact Details! </h3>
+      <Card className="card">
+        <Card.Body>
+          <Form onSubmit={submitFormData} className="form">
+            <Form.Group className="mb-3">
+              <div className="contacts-container">
+                <select required>
+                  {options.map(ele => (
+                    <option key={ele}>{ele}</option>
+                  ))}
+                </select>
+                <br />
 
-      <input
-        required
-        id="phnumber"
-        name="phnumber"
-        onChange={e => {
-          setPhn(e.target.value);
-        }}
-      />
-      <br />
-      {Object.keys(phnErr).map(key => (
-        <div style={{ color: 'red' }}>{phnErr[key]}</div>
-      ))}
-      <label>
-        <input
-          type="checkbox"
-          required
-          defaultChecked={checked}
-          onChange={() => setChecked(!checked)}
-        />
-      </label>
-      <br />
-      <button type="submit" onClick={redirectBackward}>
-        Back
-      </button>
-      <button type="submit">Save</button>
-      <button type="submit" disabled>
-        Save & Next
-      </button>
-    </form>
+                <Form.Label className="label-control">Phone Number: </Form.Label>
+                <Form.Control
+                  style={{ border: error ? '2px solid red' : '' }}
+                  name="phoneNumber"
+                  defaultValue={values.phoneNumber}
+                  type="number"
+                  placeholder="phoneNumber"
+                  required
+                  onChange={handleFormData('phoneNumber')}
+                  className="input-control"
+                />
+                <br />
+                {error ? (
+                  <Form.Text style={{ color: 'red' }}>Enter a valid Phone Number!</Form.Text>
+                ) : (
+                  ''
+                )}
+                <br />
+
+                <label className="label-control">
+                  AcceptTermsAndCondition:
+                  <input
+                    type="checkbox"
+                    required
+                    defaultChecked={checked}
+                    onChange={handleChange}
+                  />
+                </label>
+                <br />
+              </div>
+            </Form.Group>
+            <div className="button-block">
+              <button variant="primary" type="submit" onClick={prevStep} className="custom-btn">
+                Back
+              </button>
+              <button
+                variant="primary"
+                type="submit"
+                onClick={handleFormData}
+                className="custom-btn"
+              >
+                Submit
+              </button>
+              <button variant="primary" type="submit" disabled className="custom-btn">
+                Save & Next
+              </button>
+            </div>
+          </Form>
+        </Card.Body>
+      </Card>
+    </div>
   );
-}
+};
 
 export default Form3;

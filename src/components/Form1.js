@@ -1,97 +1,92 @@
-// import React from 'react';
-
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Form, Card } from 'react-bootstrap';
+import '../App.css';
 
-function Form1() {
-  const history = useHistory();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const Form1 = ({ nextStep, handleFormData, values }) => {
+  const [error, setError] = useState(false);
 
-  const [emailErr, setEmailErr] = useState({});
-  const [passwordErr, setPasswordErr] = useState({});
-
-  const onSubmit = e => {
+  const submitFormData = e => {
     e.preventDefault();
-    const isValid = formValidation();
-    if (isValid) {
-      const data = new FormData(event.target);
-      setEmail('');
-      setPassword('');
-      history.push('/form2');
-    }
-  };
-
-  const formValidation = () => {
-    const emailErr = {};
-    const passwordErr = {};
-    let isValid = true;
-
-    if (!email.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)) {
-      emailErr.emailValid = 'Enter a valid email';
-      isValid = false;
-    }
-
     if (
-      !password.match(
-        /^(?=.*?[A-Z]{2,})(?=.*?[a-z]{2,})(?=.*?[0-9]{2,})(?=.*?[#?!@$%^&*-]{2,}).{8,}$/,
+      values.email.match(
+        /^([a-zA-Z0-9!#$%&'*+=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)$/,
+      ) &&
+      values.password.match(
+        /^(?=(.*\d){2})(?=(.*[a-z]){2})(?=(.*[A-Z]){2})(?=(.*[!@#$%]){2}).{8,}$/,
       )
     ) {
-      passwordErr.passwordValid = 'Enter a valid password';
-      isValid = false;
+      setError(false);
+      nextStep();
+      // console.log('valid');
+    } else {
+      setError(true);
+      // console.log(values.email);
+      // console.log(values.password);
     }
-
-    setEmailErr(emailErr);
-    setPasswordErr(passwordErr);
-
-    return isValid;
   };
 
   return (
-    <form className="form" onSubmit={onSubmit}>
-      <label htmlFor="email" className="label-control">
-        Email
-      </label>
-
-      <input
-        type="email"
-        id="email"
-        className="input-control"
-        name="email"
-        onChange={e => {
-          setEmail(e.target.value);
-        }}
-      />
-      <br />
-
-      {Object.keys(emailErr).map(key => (
-        <div style={{ color: 'red' }}>{emailErr[key]}</div>
-      ))}
-      <label htmlFor="password" className="label-control">
-        Password
-      </label>
-
-      <input
-        type="password"
-        id="password"
-        className="input-control"
-        name="password"
-        onChange={e => {
-          setPassword(e.target.value);
-        }}
-      />
-      <br />
-      {Object.keys(passwordErr).map(key => (
-        <div style={{ color: 'red' }}>{passwordErr[key]}</div>
-      ))}
-
-      <button type="submit" disabled>
-        Back
-      </button>
-      <button type="submit">Save</button>
-      <button type="submit">Save & Next</button>
-    </form>
+    <div className="container">
+      <h3>Sign up!</h3>
+      <Card className="card">
+        <Card.Body>
+          <Form onSubmit={submitFormData} className="form">
+            <Form.Group className="mb-3">
+              <Form.Label className="label-control">Email: </Form.Label>
+              <Form.Control
+                style={{ border: error ? '2px solid red' : '' }}
+                name="email"
+                defaultValue={values.email}
+                type="email"
+                placeholder="Email Id"
+                required
+                onChange={handleFormData('email')}
+                className="input-control"
+              />
+              <br />
+              {error ? <Form.Text style={{ color: 'red' }}>Enter a valid email id!</Form.Text> : ''}
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="label-control">Password: </Form.Label>
+              <Form.Control
+                style={{ border: error ? '2px solid red' : '' }}
+                name="password"
+                defaultValue={values.password}
+                type="password"
+                placeholder="Password"
+                required
+                onChange={handleFormData('password')}
+                className="input-control"
+              />
+              <br />
+              {error ? <Form.Text style={{ color: 'red' }}>Enter a valid password!</Form.Text> : ''}
+            </Form.Group>
+            <div className="button-block">
+              <button variant="primary" type="submit" disabled className="custom-btn">
+                Back
+              </button>
+              <button
+                variant="primary"
+                type="submit"
+                onClick={handleFormData}
+                className="custom-btn"
+              >
+                Save
+              </button>
+              <button
+                variant="primary"
+                type="submit"
+                onClick={handleFormData}
+                className="custom-btn"
+              >
+                Save & Next
+              </button>
+            </div>
+          </Form>
+        </Card.Body>
+      </Card>
+    </div>
   );
-}
+};
 
 export default Form1;
